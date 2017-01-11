@@ -1,0 +1,26 @@
+#!/bin/bash
+
+original_display=${DISPLAY}
+xephyr_display=:1
+export DISPLAY=${xephyr_display}
+
+function xephyr-position {
+    export DISPLAY=${original_display}
+    xephyr_id=`wmctrl -l | grep 'xephyr-screencast' | awk '{print $1}'`
+    wmctrl -i -r "${xephyr_id}" -e 0,0,2360,1920,1080
+    export DISPLAY=${xephyr_display}
+}
+
+function xephyr-start {
+    DISPLAY=${original_display} Xephyr -br -ac -noreset -screen 1920x1080 -name xephyr-screencast -title xephyr-screencast ${xephyr_display} &
+    metacity 2>&1 >/dev/null &
+    sleep 1
+    xephyr-position
+}
+
+
+ps -ef | grep xephyr-screencast | grep -v grep 2>&1 >/dev/null
+if [ $? == 1 ]
+then
+    xephyr-start
+fi
